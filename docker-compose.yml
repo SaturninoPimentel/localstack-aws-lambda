@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  localstack:
+    network_mode: bridge
+    build: .
+    container_name: localstack-test
+    hostname: localstack
+    healthcheck:
+      test: aws sns list-topics && aws sqs list-queues && aws lambda list-functions && aws iam list-roles
+      interval: 3s
+      timeout: 10s
+    environment:
+      - LOCALSTACK_HOST=localhost
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - AWS_REGION=us-east-1
+      - SERVICES=sns,sqs,s3,iam,lambda
+      - AWS_DEFAULT_REGION=us-east-1
+    ports:
+      - "4575:4575"
+      - "4576:4576"
+      - "4566:4566"
+    volumes:
+      - ./localstack_bootstrap:/etc/localstack/init/ready.d
+      - /var/run/docker.sock:/var/run/docker.sock
